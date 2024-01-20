@@ -7,7 +7,7 @@ proc upload(ctx: Context) {.async.} =
   if ctx.request.reqMethod == HttpGet:
     await ctx.staticFileResponse("tests/local/uploadFile/upload.html", "")
   elif ctx.request.reqMethod == HttpPost:
-    let file = ctx.getUploadFile("file")
+    let file = ctx.getUploadFile("userfile")
     file.save("tests/assets/temp")
     file.save("tests/assets/temp", "set.txt")
     doAssertRaises(OSError):

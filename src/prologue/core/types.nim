@@ -40,18 +40,18 @@ type
     Fault = "fault"
 
   FormPart* = object
-    data*: OrderedTableRef[string, tuple[params: StringTableRef, body: string]]
-
+    data*: OrderedTableRef[string, seq[tuple[params: StringTableRef, body: string]]]
 
 func initFormPart*(): FormPart =
-  FormPart(data: newOrderedTable[string, (StringTableRef, string)]())
+  FormPart(data: newOrderedTable[string, seq[tuple[params: StringTableRef, body: string]]]())
 
-func `[]`*(formPart: FormPart, key: string): tuple[params: StringTableRef,
-           body: string] {.inline.} =
+func `[]`*(formPart: FormPart, key: string): seq[tuple[params: StringTableRef,
+           body: string]] {.inline.} =
   formPart.data[key]
 
-proc `[]=`*(formPart: FormPart, key: string, body: string) {.inline.} =
-  formPart.data[key] = (newStringTable(mode = modeCaseSensitive), body)
+proc add*(formPart: FormPart, key: string, body: string) {.inline.} =
+  formPart.data[key].add((newStringTable(mode = modeCaseSensitive), body))
+
 
 func tryParseInt(value: string, default: int): int {.inline.} =
   try:

@@ -166,9 +166,16 @@ func initUploadFile*(filename, body: string): UpLoadFile =
   UploadFile(filename: filename, body: body)
 
 func getUploadFile*(ctx: Context, name: string): UpLoadFile {.inline.} =
-  ## Gets the UploadFile from request.
-  let file = ctx.request.formParams[name]
+  ## Gets the first UploadFile from request.
+  let file = ctx.request.formParams[name][0]
   initUploadFile(filename = file.params.getOrDefault("filename"), body = file.body)
+
+func getUploadFiles*(ctx: Context, name: string): seq[UpLoadFile] {.inline.} =
+  ## Gets all the UploadFiles from request.
+  ## Use this for form fields with the `multiple` attribute
+  let files = ctx.request.formParams[name]
+  for file in files:
+    result.add(initUploadFile(filename = file.params.getOrDefault("filename"), body = file.body))
 
 proc save*(uploadFile: UpLoadFile, dir: string, filename = "") {.inline.} =
   ## Saves the UploadFile to ``dir``.
@@ -390,7 +397,7 @@ func getFormParamsOption*(ctx: Context, key: string): Option[string] {.inline.} 
   ##
   ## `getFormParams` handles both `form-urlencoded` and `multipart/form-data`.
   let hasFormParam = key in ctx.request.formParams.data
-  result = if hasFormParam: some(ctx.request.formParams[key].body) else: none(string)
+  result = if hasFormParam: some(ctx.request.formParams[key][0].body) else: none(string)
 
 func getFormParams*(ctx: Context, key: string, default = ""): string {.inline.} =
   ## Gets the contents of the form if key exists. Otherwise `default` will be returned.
